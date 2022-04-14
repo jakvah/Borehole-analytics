@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="UTF-8">
+  <title>Multiview / DataViewer</title>
+
+
+{% extends "navbar.html" %}
+{% block body %}
+<!--Selection form-->
+<div class="container">
+  <h2>Pick parameters</h2>
+  <form action="/multi_load_data" method="POST">
+        <h6>X axis parameter</h6>
+        <div class="container">
+            <div class="form-row algin-items-center">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="xaxis" value="calculation.resultoverview.surveydistance">
+                    <label class="form-check-label" for="inlineCheckbox1">Depth</label>
+                </div>
+            </div>
+        </div>
+        <h6>Y axis parameters</h6>
+        <div class="container">
+            <div class="form-row algin-items-center">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="yaxis" value="calculation.eohresult.stddeveasting">
+                    <label class="form-check-label" for="inlineCheckbox1">Easting Std</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="yaxis" value="calculation.eohresult.stddevpos">
+                    <label class="form-check-label" for="inlineCheckbox2">Position Std</label>
+                </div>
+                
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="yaxis" value="calculation.northseekerresult.azimuth">
+                    <label class="form-check-label" for="inlineCheckbox2">Azimuth</label>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-2">Submit</button>            
+            </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+
+<style>
+  #clickableIcon {
+        cursor: pointer
+    }
+</style>
+
+
+{% endblock %}

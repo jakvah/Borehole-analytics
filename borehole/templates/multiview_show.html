@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="UTF-8">
+  <title>Multiview / DataViewer</title>
+<!--Selection form-->
+<div class="container">
+  <h2>Pick parameters</h2>
+  <form action="/multi_load_data" method="POST">
+        <h6>X axis parameter</h6>
+        <div class="container">
+            <div class="form-row algin-items-center">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="xaxis" value="param1">
+                    <label class="form-check-label" for="inlineCheckbox1">1</label>
+                </div>
+            </div>
+        </div>
+        <h6>Y axis parameters</h6>
+        <div class="container">
+            <div class="form-row algin-items-center">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="yaxis" value="param2">
+                    <label class="form-check-label" for="inlineCheckbox1">1</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="yaxis" value="param3">
+                    <label class="form-check-label" for="inlineCheckbox2">2</label>
+                </div>
+                
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="yaxis" value="param4">
+                    <label class="form-check-label" for="inlineCheckbox2">2</label>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-2">Submit</button>            
+            </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<div class="container">
+    <h5> Header placeholder string </h5>
+</div>
+<!-- Graph part-->
+<div class="container">
+      {% for i in range(num_y_params) %}
+                <div class="row">
+                  <canvas id="graph_{{i}}"></canvas>
+                </div>
+      {% endfor %}
+</div>
+<!-- Graph part-->
+
+
+<!-- Script for Graphs -->
+{% for i in range(num_y_params) %}
+    <script>
+        var config_{{i}} = {
+        type: 'scatter',
+        data: {            
+            datasets: [{
+            label : '{{y_axis_tags[i]}}',
+            data: {{row_data[i]|safe}},
+            //fill:true,
+            //steppedLine: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Chart.js Scatter Chart'
+        }
+      }
+    },
+        };
+        
+        var ctx = document.getElementById("graph_{{i}}").getContext("2d");
+        new Chart(ctx, config_{{i}});
+</script>
+
+{% endfor %}
+
+
+
+
+
+
+
+<style>
+  #clickableIcon {
+        cursor: pointer
+    }
+</style>
+
+
