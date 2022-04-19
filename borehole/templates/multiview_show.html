@@ -4,48 +4,57 @@
   <title>Multiview / DataViewer</title>
 <!--Selection form-->
 <div class="container">
-  <h2>Pick parameters</h2>
-  <form action="/multi_load_data" method="POST">
-        <h6>X axis parameter</h6>
-        <div class="container">
-            <div class="form-row algin-items-center">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="xaxis" value="param1">
-                    <label class="form-check-label" for="inlineCheckbox1">1</label>
-                </div>
-            </div>
-        </div>
-        <h6>Y axis parameters</h6>
-        <div class="container">
-            <div class="form-row algin-items-center">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="yaxis" value="param2">
-                    <label class="form-check-label" for="inlineCheckbox1">1</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="yaxis" value="param3">
-                    <label class="form-check-label" for="inlineCheckbox2">2</label>
-                </div>
-                
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="yaxis" value="param4">
-                    <label class="form-check-label" for="inlineCheckbox2">2</label>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary mb-2">Submit</button>            
-            </div>
-            </div>
-        </div>
+    <h2>Pick parameters</h2>
+    
+    <form action="/multi_load_data" method="POST">
+          <h4>X axis parameter</h4>
+          <div class="container">
+              <div class="form-row algin-items-center">
+                  <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="xaxis" value="calculation.resultoverview.surveydistance">
+                      <label class="form-check-label" for="inlineCheckbox1">Survey Distance</label>
+                  </div>
+              </div>
+          </div>
+          <h4>Y axis parameters</h4>
+          <div class="container">
+              
+                  {% for key,value in param_cfg.items() %}
+                  <h6>{{ key }}</h6>
+                  <div class="container">
+                  <div class="form-row algin-items-center">
+                  {% for param,paramvalue in value.items() %}
+                  <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="yaxis" value="{{paramvalue}}">
+                      <label class="form-check-label" for="inlineCheckbox1">{{ param }}</label>
+                  </div>
 
-    </form>
-</div>
+                  {% endfor %}
+                    </div>
+                </div>
+                  {% endfor %}
+                 
+                <div class="col-auto">
+                      <button type="submit" class="btn btn-primary mb-2">Submit</button>            
+              </div>
+
+          </div>
+  
+      </form>
+  </div>
 
 <div class="container">
-    <h5> Header placeholder string </h5>
+    <h5> Showing data based on {{ num_surveys }} surveys </h5>
 </div>
 <!-- Graph part-->
 <div class="container">
       {% for i in range(num_y_params) %}
+                <div class="row">
+                    <div class="col-md-12">
+                    <h6 style="text-align: center; margin:0px;padding-top:5px;">{{ x_axis_tag }} vs {{ y_axis_tags[i] }}</h6>   
+                  
+                    </div>
+                </div>
                 <div class="row">
                   <canvas id="graph_{{i}}"></canvas>
                 </div>

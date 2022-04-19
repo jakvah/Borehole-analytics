@@ -57,8 +57,14 @@ TRAJECTORY = {
 PARAM_CONFIG = {
     "EOH_RESULT": EOH_RESULT,
     "NORTH_SEEKER_RESULT": NORTH_SEEKER_RESULT,
-    "RESULT": RESULT,
-    "RESULT_ALL": RESULT_ALL,
+    #"RESULT": RESULT,
+    #"RESULT_ALL": RESULT_ALL,
     "RESULT_OVERVIEW": RESULT_OVERVIEW,
     "TRAJECTORY": TRAJECTORY,
 }
+
+def GET_PARAM_GROUPS():
+    l = []
+    for key,value in PARAM_CONFIG.items():
+        l.append(key)
+    return l

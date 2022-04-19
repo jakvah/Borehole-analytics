@@ -54,6 +54,7 @@ def get_data(attribute):
     values = []
     for i in range(len(j)):
         values.append(j[i][attribute]["value"])
+    
     return values
 
 def pair_datasets(series1,series2):

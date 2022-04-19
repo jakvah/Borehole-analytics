@@ -4,7 +4,7 @@ from flask import Flask, request, render_template, Markup
 import numpy as np
 
 from borehole.datamanager import get_data as gd
-
+from borehole.config import param_config as pc
 app = Flask(__name__)
 NUM_TABS = 2
 @app.route("/")
@@ -60,8 +60,10 @@ def multiview_show(x_axis_tag,y_tag_string,num_y_params):
 
     row_data = []
     x_axis_data = gd.get_data(x_axis_tag)
+    num_surveys = len(x_axis_data)
     for y_param in y_axis_tags:
         y_axis_data = gd.get_data(y_param)
+        print(f"Param: {y_param} len: {len(y_axis_data)}")
         row_data.append(gd.pair_datasets(x_axis_data,y_axis_data))
 
     return render_template("multiview_show.html",
@@ -69,7 +71,9 @@ def multiview_show(x_axis_tag,y_tag_string,num_y_params):
                             row_data = row_data,
                             x_axis_tag = x_axis_tag,
                             y_axis_tags = y_axis_tags,
-                            num_y_params = num_y_params
+                            num_y_params = num_y_params,
+                            num_surveys = num_surveys,
+                            param_cfg = pc.PARAM_CONFIG
                             )
 if __name__ == '__main__':
     # Set debug false if it is ever to be deployed
