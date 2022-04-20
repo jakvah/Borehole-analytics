@@ -14,6 +14,10 @@
                       <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="xaxis" value="calculation.resultoverview.surveydistance">
                       <label class="form-check-label" for="inlineCheckbox1">Survey Distance</label>
                   </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="xaxis" value="calculation.eohresult.stddevpos">
+                    <label class="form-check-label" for="inlineCheckbox1">StddevPos</label>
+                </div>
               </div>
           </div>
           <h4>Y axis parameters</h4>
@@ -51,7 +55,7 @@
       {% for i in range(num_y_params) %}
                 <div class="row">
                     <div class="col-md-12">
-                    <h6 style="text-align: center; margin:0px;padding-top:5px;">{{ x_axis_tag }} vs {{ y_axis_tags[i] }}</h6>   
+                    <h5 style="text-align: center; margin:0px;padding-top:5px;">{{ x_axis_tag.split(".")[-1] }} vs {{ y_axis_tags[i].split(".")[-1] }}</h5>   
                   
                     </div>
                 </div>
@@ -77,6 +81,20 @@
             }]
         },
         options: {
+            scales: {
+                    yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: '{{y_axis_tags[i].split(".")[-1]}}'
+                    }
+                    }],
+                    xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: '{{x_axis_tag.split(".")[-1]}}'
+                    }
+                    }],
+            },     
             responsive: true,
             plugins: {
               legend: {

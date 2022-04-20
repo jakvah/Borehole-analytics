@@ -21,7 +21,9 @@ def multiview():
     navbar_status = [""]*NUM_TABS
     navbar_status[1] = "active"
 
-    return render_template("multiview.html",navbar_status=navbar_status,
+    return render_template("multiview.html",
+                            navbar_status=navbar_status,
+                            param_cfg = pc.PARAM_CONFIG
     )                 
 
 @app.route("/multi_load_data", methods=["POST"])

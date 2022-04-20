@@ -8,41 +8,48 @@
 {% block body %}
 <!--Selection form-->
 <div class="container">
-  <h2>Pick parameters</h2>
-  <form action="/multi_load_data" method="POST">
-        <h6>X axis parameter</h6>
-        <div class="container">
-            <div class="form-row algin-items-center">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="xaxis" value="calculation.resultoverview.surveydistance">
-                    <label class="form-check-label" for="inlineCheckbox1">Depth</label>
+    <h2>Pick parameters</h2>
+    
+    <form action="/multi_load_data" method="POST">
+          <h4>X axis parameter</h4>
+          <div class="container">
+              <div class="form-row algin-items-center">
+                  <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="xaxis" value="calculation.resultoverview.surveydistance">
+                      <label class="form-check-label" for="inlineCheckbox1">Survey Distance</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="xaxis" value="calculation.eohresult.stddevpos">
+                    <label class="form-check-label" for="inlineCheckbox1">StddevPos</label>
                 </div>
-            </div>
-        </div>
-        <h6>Y axis parameters</h6>
-        <div class="container">
-            <div class="form-row algin-items-center">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="yaxis" value="calculation.eohresult.stddeveasting">
-                    <label class="form-check-label" for="inlineCheckbox1">Easting Std</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="yaxis" value="calculation.eohresult.stddevpos">
-                    <label class="form-check-label" for="inlineCheckbox2">Position Std</label>
-                </div>
-                
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="yaxis" value="calculation.northseekerresult.azimuth">
-                    <label class="form-check-label" for="inlineCheckbox2">Azimuth</label>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary mb-2">Submit</button>            
-            </div>
-            </div>
-        </div>
+              </div>
+          </div>
+          <h4>Y axis parameters</h4>
+          <div class="container">
+              
+                  {% for key,value in param_cfg.items() %}
+                  <h6>{{ key }}</h6>
+                  <div class="container">
+                  <div class="form-row algin-items-center">
+                  {% for param,paramvalue in value.items() %}
+                  <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="yaxis" value="{{paramvalue}}">
+                      <label class="form-check-label" for="inlineCheckbox1">{{ param }}</label>
+                  </div>
 
-    </form>
-</div>
+                  {% endfor %}
+                    </div>
+                </div>
+                  {% endfor %}
+                 
+                <div class="col-auto">
+                      <button type="submit" class="btn btn-primary mb-2">Submit</button>            
+              </div>
+
+          </div>
+  
+      </form>
+  </div>
 
 
 <style>
