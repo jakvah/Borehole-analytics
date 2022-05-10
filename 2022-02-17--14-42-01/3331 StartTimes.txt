@@ -1,0 +1,12 @@
+Start time 1: 1153
+Stop time 1: 5965
+Start time 2: 8670
+Stop time 2: 13059
+Start time 3: 16993
+Stop time 3: 21430
+Start time 1 temp: 6145
+Stop time 1 temp: 8012
+Start time 2 temp: 13760
+Stop time 2 temp: 15867
+Start time 3 temp: 22073
+Stop time 3 temp: 23321

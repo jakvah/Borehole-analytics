@@ -3,7 +3,7 @@ import numpy as np
 from borehole.datamanager import get_data as gd
 
 
-def plot_param(param_1,param_2,remove_outliers = False,log = True):    
+def plot_param(param_1,param_2,remove_outliers = True,log = False):    
     param_1_data = gd.get_data(param_1)
     param_2_data = gd.get_data(param_2)
 
@@ -47,6 +47,6 @@ def remove_none(l1,l2):
 
 if __name__ == "__main__":
     PARAM1 = "calculation.resultoverview.surveydistance"
-    PARAM2 = "calculation.eohresult.avgelevation"
+    PARAM2 = "calculation.eohresult.stddevpos"
 
     plot_param(PARAM1,PARAM2)
