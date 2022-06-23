@@ -41,8 +41,10 @@ import numpy as np
 import xlrd
 import xlsxwriter
 from scipy import signal
+from scipy import optimize
 from pandas import DataFrame
-
+import optimization_functions as of
+#import simplex_lib as splx
 
 sequencemode = 3            #  0: run old style one processtep at a time
                             #  1: run processtep 1 only (use for first tool in a batch, where timing files need to be tuned)
@@ -85,8 +87,6 @@ if autostarttime == False:
 	stoptime_Tcomp = 4299
                                                                 # seconds to average gyro bias and temperature standstill values
 
-
-
 logfile_acc_gsens = toolSN + ' ' + str(abstemp) + 'C' + ' ' + 'rotgsens.xlsx' 
 sheetname_acc_gsens = toolSN + ' ' + str(abstemp) + 'C' + ' ' + 'rotgsens'
 
@@ -101,7 +101,6 @@ pickfile_writeAC = toolSN + ' ' + str(abstemp) + 'C' + 'acc gsens picked dataAC.
 picksheet_writeAC =  'Ark1'
 
 f_s_acc = 10    
-
 
 # plot figures in gsens wo erc
 plotfigs1 = False
@@ -130,23 +129,16 @@ acc_cal_sheet =  'Ark1'
 
 # parameters processtep 3
 
-
-
 f_s_temp = 10                                                            
 
 gyroTcal_file = toolSN + ' gyro Tconst.xlsx'
-
-
 
 gyroTcal_sheet = 'Ark1'
 
 
 # parameters processtep 4
-                                            
-
 
 gyrogsenscal_file = toolSN + ' ' + str(abstemp) + 'C' + ' ' + 'gyro gsens ier.xlsx'
-
     
 gyrogsenscal_sheet = 'Ark1'
 
@@ -193,9 +185,8 @@ gyrogsenscal_erc_file = toolSN + ' ' + str(abstemp) + 'C' + ' ' + 'gyro gsens er
 
 gyrogsenscal_erc_sheet = 'Ark1'
 
-# function definitions
 
-          
+
 def readrawdata(file_path, sheetname_data):
           
     # read data file (flex data)
@@ -567,9 +558,6 @@ def plot_figures_ps1AC(time, accXcount, accYcount, accZcount, AXpick, AYpick, AZ
    
     return
 
-
-
-
 def acc_gsens_pick(meas_point, av_time, timeabs, f_s_acc, accXcount, accYcount, accZcount, TAcount, GX1count, GY1count, GX2count, GZ2count, TG1count, TG2count):
     
     AXpick = np.zeros(len(meas_point))
@@ -758,7 +746,6 @@ def save_file_ps1AC(pickfile_write, picksheet_write, meas_point, AXpick_av, AYpi
     return
 
 
-
 def read_file_ps1(file_path, sheetname_data):
 
     # read data file 
@@ -840,7 +827,6 @@ def read_file_ps1(file_path, sheetname_data):
     return meas_point, AXpick_av, AYpick_av, AZpick_av, GX1pick_av, GY1pick_av, GX2pick_av, GZ2pick_av, TApick_av, TG1pick_av, TG2pick_av, AXRef, AYRef, AZRef   
 
 
-
 def read_file_ps1AC(file_path, sheetname_data):
 
     # read data file 
@@ -891,10 +877,7 @@ def read_file_ps1AC(file_path, sheetname_data):
     return meas_point, AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef
 
 
-
-
-
-def acc_cal_classic(AX, AY, AZ, TA, AXRef, AYRef, AZRef):
+def acc_cal_classic123(AX, AY, AZ, TA, AXRef, AYRef, AZRef):
     
     rows = len(AX)
     M = np.empty((rows,4))
@@ -939,7 +922,6 @@ def acc_cal_classic(AX, AY, AZ, TA, AXRef, AYRef, AZRef):
     T = np.average(TA)
     
     return xfactors, yfactors, zfactors, xoffset, yoffset, zoffset, T
-
 
 
 def acc_cal_3rd_order(AX, AY, AZ, TA, AXRef, AYRef, AZRef):
@@ -1018,7 +1000,6 @@ def save_file_cal_constants(filename, sheetname, AXoffset, AYoffset, AZoffset, X
     
     workbook.close()    
     return
-
 
 
 def read_file_cal_constants(filename, sheetname):
@@ -1102,7 +1083,6 @@ def calibrate_acc_3rd_order(AXcount, AYcount, AZcount, xfactor, yfactor, zfactor
                 + zfactor[7] * AXcount[n]**3 + zfactor[8] * AYcount[n]**3 + zfactor[9] * AZcount[n]**3  
     
     return AXcal, AYcal, AZcal
-
 
 
 def acc_calibrationQC(AXcal_lin, AYcal_lin, AZcal_lin, AXcal_3rd, AYcal_3rd, AZcal_3rd, AXRef, AYRef, AZRef):
@@ -1786,8 +1766,6 @@ def calculate_gyro_gbias(GX1count, GY1count, GX2count, GZ2count, GX1factors, GY1
     
     return GX1g_bias, GY1g_bias, GX2g_bias, GZ2g_bias
     
-    
-    
 
 def plot_figures_ps4(time, GX1count, GY1count, GX2count, GZ2count, meas_point, GX1pick_TCav, GY1pick_TCav, GX2pick_TCav, GZ2pick_TCav):
     
@@ -2057,7 +2035,7 @@ def gyro_rot_pick(meas_point, timeabs, rotrate, av_time_ss, av_time_rot, margin_
     return GX1av, GY1av, GX2av, GZ2av, TG1av, TG2av
 
 
-def calc_gyro_ortomatrix(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, rotrateXr, GX1avYr, GY1avYr, GX2avYr, \
+def calc_gyro_ortomatrix123(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, rotrateXr, GX1avYr, GY1avYr, GX2avYr, \
                          GZ2avYr, TG1avYr, TG2avYr, rotrateYr, GX1avZr, GY1avZr, GX2avZr, GZ2avZr, TG1avZr, TG2avZr, rotrateZr):
     
     xelements = 0
@@ -2159,6 +2137,7 @@ def calc_gyro_ortomatrix(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, r
         invMTM = np.linalg.inv(MTM)
         invMTM_MT = np.matmul(invMTM, MT)
         OT = np.matmul(invMTM_MT, F)
+        
         if GXoption == 0:
             xfactorsGX0 = OT[:, 0]
             yfactorsGX0 = OT[:, 1]
@@ -2486,7 +2465,7 @@ if sequencemode == 0:
         = read_file_ps1(pickfile_read , picksheet_read)
         
         # find accelerometer calibration constants, classical calibration (ortomatrix  and offset)
-        xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = acc_cal_classic(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)    
+        xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)    
         
         # 3rd order accelerometer calibration constants
         xfactors_3rd, yfactors_3rd, zfactors_3rd, T_3rd = acc_cal_3rd_order(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
@@ -2559,7 +2538,7 @@ if sequencemode == 0:
         
 
         # find accelerometer calibration constants, classical calibration (ortomatrix  and offset)
-        xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = acc_cal_classic(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
+        xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
         
         # calibrate picked accelerometer data, classical method
         AXcal_lin, AYcal_lin, AZcal_lin = calibrate_acc_classical(AXpick_av, AYpick_av, AZpick_av, xfactors_lin, yfactors_lin, zfactors_lin)
@@ -2631,7 +2610,7 @@ if sequencemode == 0:
         
         # calculate ortomatrix, returns three versions of ortomatrix, one for each GXoption
         
-        xfactorsGX0, yfactorsGX0, zfactorsGX0, xfactorsGX1, yfactorsGX1, zfactorsGX1, xfactorsGX2, yfactorsGX2, zfactorsGX2, TG1, TG2 = calc_gyro_ortomatrix(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, rotrateXr, GX1avYr, GY1avYr, GX2avYr, \
+        xfactorsGX0, yfactorsGX0, zfactorsGX0, xfactorsGX1, yfactorsGX1, zfactorsGX1, xfactorsGX2, yfactorsGX2, zfactorsGX2, TG1, TG2 = of.calc_gyro_ortomatrix_simplex(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, rotrateXr, GX1avYr, GY1avYr, GX2avYr, \
                                   GZ2avYr, TG1avYr, TG2avYr, rotrateYr, GX1avZr, GY1avZr, GX2avZr, GZ2avZr, TG1avZr, TG2avZr, rotrateZr)
     
         # write gyro ortomatrix to file. Write all three versions to same file (GX0 = average of GX1 and GX2 counts, GX1 count and GX2 counts)
@@ -2674,7 +2653,7 @@ if sequencemode == 0:
         
   
         # find accelerometer calibration constants, classical calibration (ortomatrix  and offset)
-        xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = acc_cal_classic(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
+        xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
         
         # calibrate picked accelerometer data, classical method
         AXcal_lin, AYcal_lin, AZcal_lin = calibrate_acc_classical(AXpick_av, AYpick_av, AZpick_av, xfactors_lin, yfactors_lin, zfactors_lin)
@@ -2698,7 +2677,6 @@ if sequencemode == 0:
                                     GY1pick_TCav, GX2pick_TCav, GZ2pick_TCav, TG1pick_av, TG2pick_av, 171, 172, 173, 174, plotfigs2)        
         
         save_file_gsens(gyrogsenscal_erc_file, gyrogsenscal_erc_sheet, GX1gsens_erc, GY1gsens_erc, GX2gsens_erc, GZ2gsens_erc, TG1, TG2, abstemp)
-
 
 
 if sequencemode ==1:
@@ -2784,7 +2762,7 @@ if sequencemode == 2:
             = read_file_ps1(pickfile_read , picksheet_read)
             
             # find accelerometer calibration constants, classical calibration (ortomatrix  and offset)
-            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = acc_cal_classic(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)    
+            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)    
             
             # 3rd order accelerometer calibration constants
             xfactors_3rd, yfactors_3rd, zfactors_3rd, T_3rd = acc_cal_3rd_order(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
@@ -2856,7 +2834,7 @@ if sequencemode == 2:
             
 
             # find accelerometer calibration constants, classical calibration (ortomatrix  and offset)
-            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = acc_cal_classic(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
+            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
             
             # calibrate picked accelerometer data, classical method
             AXcal_lin, AYcal_lin, AZcal_lin = calibrate_acc_classical(AXpick_av, AYpick_av, AZpick_av, xfactors_lin, yfactors_lin, zfactors_lin)
@@ -2926,7 +2904,7 @@ if sequencemode == 2:
             
             # calculate ortomatrix, returns three versions of ortomatrix, one for each GXoption
             
-            xfactorsGX0, yfactorsGX0, zfactorsGX0, xfactorsGX1, yfactorsGX1, zfactorsGX1, xfactorsGX2, yfactorsGX2, zfactorsGX2, TG1, TG2 = calc_gyro_ortomatrix(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, rotrateXr, GX1avYr, GY1avYr, GX2avYr, \
+            xfactorsGX0, yfactorsGX0, zfactorsGX0, xfactorsGX1, yfactorsGX1, zfactorsGX1, xfactorsGX2, yfactorsGX2, zfactorsGX2, TG1, TG2 = of.calc_gyro_ortomatrix_simplex(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, rotrateXr, GX1avYr, GY1avYr, GX2avYr, \
                                       GZ2avYr, TG1avYr, TG2avYr, rotrateYr, GX1avZr, GY1avZr, GX2avZr, GZ2avZr, TG1avZr, TG2avZr, rotrateZr)
         
             # write gyro ortomatrix to file. Write all three versions to same file (GX0 = average of GX1 and GX2 counts, GX1 count and GX2 counts)
@@ -2969,7 +2947,7 @@ if sequencemode == 2:
             
   
             # find accelerometer calibration constants, classical calibration (ortomatrix  and offset)
-            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = acc_cal_classic(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
+            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
             
             # calibrate picked accelerometer data, classical method
             AXcal_lin, AYcal_lin, AZcal_lin = calibrate_acc_classical(AXpick_av, AYpick_av, AZpick_av, xfactors_lin, yfactors_lin, zfactors_lin)
@@ -2997,9 +2975,10 @@ if sequencemode == 2:
 if sequencemode == 3:            
     
     for processtep in (1,2,3,4,5,6):   
+        print('Process step: ', processtep)
         if processtep == 1:
         
-    #read data from raw data file 
+            #read data from raw data file 
             index, accXcount, accYcount, accZcount, GX1count, GY1count, GX2count, GZ2count, GX3count, GY3count, GZ3count, TAcount, \
                 TG1count, TG2count, TG3count = readrawdata(logfile_acc_gsens, sheetname_acc_gsens)
             
@@ -3073,11 +3052,25 @@ if sequencemode == 3:
             = read_file_ps1(pickfile_read , picksheet_read)
             
             # find accelerometer calibration constants, classical calibration (ortomatrix  and offset)
-            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = acc_cal_classic(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)    
+            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)    
+
+            # ***** Simplex-refelection accelerometer calibration 3rd order *****
+            x_splx_lin, y_splx_lin, z_splx_lin, x_splxoffset, y_splxoffset, z_splxoffset, T_splx_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)    
             
             # 3rd order accelerometer calibration constants
             xfactors_3rd, yfactors_3rd, zfactors_3rd, T_3rd = acc_cal_3rd_order(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
-           
+            #print('xfactors_3rd: ', type(xfactors_3rd), xfactors_3rd.shape, np.concatenate([xfactors_3rd, xfactors_3rd, xfactors_3rd]))
+            #print('xfactors_3rd: ', xfactors_3rd, np.transpose(xfactors_3rd))
+            #print('AXpick_av: ', type(AXpick_av))
+            #print(xfactors_3rd, '\n', yfactors_3rd, '\n', zfactors_3rd)
+            print('L1 existing 3rd order:', of.ModelDev3_L1(np.concatenate([xfactors_3rd, yfactors_3rd, zfactors_3rd]), AXRef, AYRef, AZRef, AXpick_av, AYpick_av, AZpick_av))
+            
+            # ***** Simplex-refelection accelerometer calibration 3rd order *****
+            x_splx, y_splx, z_splx, T_splx = of.acc_cal3_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef, xfactors_3rd, yfactors_3rd, zfactors_3rd)
+            #x_splx, y_splx, z_splx, T_splx = of.acc_cal3_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef, 0.9*xfactors_3rd[0:7], yfactors_3rd[0:7], zfactors_3rd[0:7])
+            #print(x_splx, '\n', y_splx, '\n', z_splx)
+            print('L1 simplex 3rd order:', of.ModelDev3_L1(np.concatenate([x_splx, y_splx, z_splx]), AXRef, AYRef, AZRef, AXpick_av, AYpick_av, AZpick_av))
+            
             # calibrate picked accelerometer data, classical method
             AXcal_lin, AYcal_lin, AZcal_lin = calibrate_acc_classical(AXpick_av, AYpick_av, AZpick_av, xfactors_lin, yfactors_lin, zfactors_lin)
             
@@ -3115,8 +3108,6 @@ if sequencemode == 3:
             save_file_gyroT_constants(gyroTcal_file, gyroTcal_sheet, TcoeffGX1, TcoeffGY1, TcoeffGX2, TcoeffGZ2, \
                                       TcoeffGX1lin, TcoeffGY1lin, TcoeffGX2lin, TcoeffGZ2lin,TG1min, TG1max, TG2min, TG2max)
 
-        
-        
     
         if processtep == 4:
         
@@ -3144,7 +3135,7 @@ if sequencemode == 3:
             
 
             # find accelerometer calibration constants, classical calibration (ortomatrix  and offset)
-            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = acc_cal_classic(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
+            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
             
             # calibrate picked accelerometer data, classical method
             AXcal_lin, AYcal_lin, AZcal_lin = calibrate_acc_classical(AXpick_av, AYpick_av, AZpick_av, xfactors_lin, yfactors_lin, zfactors_lin)
@@ -3209,12 +3200,16 @@ if sequencemode == 3:
             
             
             # calculate ortomatrix, returns three versions of ortomatrix, one for each GXoption
+            xfactorsGX0, yfactorsGX0, zfactorsGX0, xfactorsGX1, yfactorsGX1, zfactorsGX1, xfactorsGX2, yfactorsGX2, zfactorsGX2, TG1, TG2 = of.calc_gyro_ortomatrix_simplex(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, rotrateXr, GX1avYr, GY1avYr, GX2avYr, \
+                                      GZ2avYr, TG1avYr, TG2avYr, rotrateYr, GX1avZr, GY1avZr, GX2avZr, GZ2avZr, TG1avZr, TG2avZr, rotrateZr)
             
-            xfactorsGX0, yfactorsGX0, zfactorsGX0, xfactorsGX1, yfactorsGX1, zfactorsGX1, xfactorsGX2, yfactorsGX2, zfactorsGX2, TG1, TG2 = calc_gyro_ortomatrix(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, rotrateXr, GX1avYr, GY1avYr, GX2avYr, \
+            # ***************************************
+            # calculate ortomatrix with simplex-reflection and L1, returns three versions of ortomatrix, one for each GXoption
+            xfctrs_splxX0, yfctrs_splxX0, zfctrs_splxX0, xfctrs_splxX1, yfctrs_splxX1, zfctrs_splxX1, xfctrs_splxX2, yfctrs_splxX2, zfctrs_splxX2, TG1, TG2 = of.calc_gyro_ortomatrix_simplex(GX1avXr, GY1avXr, GX2avXr, GZ2avXr, TG1avXr, TG2avXr, rotrateXr, GX1avYr, GY1avYr, GX2avYr, \
                                       GZ2avYr, TG1avYr, TG2avYr, rotrateYr, GX1avZr, GY1avZr, GX2avZr, GZ2avZr, TG1avZr, TG2avZr, rotrateZr)
         
+        
             # write gyro ortomatrix to file. Write all three versions to same file (GX0 = average of GX1 and GX2 counts, GX1 count and GX2 counts)
-            
             save_file_gyro_orto(gyro_orto_file, gyro_orto_sheet, xfactorsGX0, yfactorsGX0, zfactorsGX0, \
                                 xfactorsGX1, yfactorsGX1, zfactorsGX1, xfactorsGX2, yfactorsGX2, zfactorsGX2, bestGX, TG1, TG2, abstemp)
         
@@ -3253,7 +3248,7 @@ if sequencemode == 3:
             
 
             # find accelerometer calibration constants, classical calibration (ortomatrix  and offset)
-            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = acc_cal_classic(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
+            xfactors_lin, yfactors_lin, zfactors_lin, xoffset, yoffset, zoffset, T_lin = of.acc_cal_1_simplex(AXpick_av, AYpick_av, AZpick_av, TApick_av, AXRef, AYRef, AZRef)
             
             # calibrate picked accelerometer data, classical method
             AXcal_lin, AYcal_lin, AZcal_lin = calibrate_acc_classical(AXpick_av, AYpick_av, AZpick_av, xfactors_lin, yfactors_lin, zfactors_lin)

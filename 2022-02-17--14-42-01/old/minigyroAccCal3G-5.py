@@ -3,7 +3,6 @@
 # Author        : Geir Bjarte
 #
 #
-#
 #	 ______   _______          _________ _______  _______
 #	(  __  \ (  ____ \|\     /|\__   __/(  ____ \(  ___  )
 #	| (  \  )| (    \/| )   ( |   ) (   | (    \/| (   ) |
@@ -65,7 +64,7 @@ processtep = 6              # processtep = 1: read acc and gyro raw data files f
 
 # parameters processtep 1
 
-abstemp = 28
+abstemp = -5
 toolSN = '3331'
 g_range_ADXL = 4        # for cal file names only
 g_range_ST = 16         # for cal file names only
@@ -82,7 +81,7 @@ standstill_time = 10
 
 if autostarttime == False: 
 	starttime_Tcomp = 80
-	stoptime_Tcomp = 4722
+	stoptime_Tcomp = 4299
                                                                     # seconds to average gyro bias and temperature standstill values
 
 
