@@ -58,19 +58,21 @@ def get_survey_means_pr_meter(tool_id=6158):
 
     longest_depth = [0]
 
-    for name in legacy_names[:10]: # <- Cut here
+    for name in legacy_names: # <- Cut here
         azi_diffs, incl_diffs, depths = get_survey_data(tool_id,name)
-        if depths[-1] > longest_depth[-1]:
-            longest_depth = depths
-
+        try:
+            if depths[-1] > longest_depth[-1]:
+                longest_depth = depths
+        except IndexError:
+            continue
         azi_diff_matrix.append(azi_diffs)
         incl_diff_matrix.append(incl_diffs)
 
     assert len(azi_diff_matrix) == len(incl_diff_matrix)
-    breakout_cond = True
+
     num_rows = len(azi_diff_matrix)
     print(f"Num rows: {num_rows}")
-    col_nr = 0
+
     
     for j in range(len(longest_depth)):
         azi_col = []
@@ -90,7 +92,13 @@ def plot_tool(tool_id=6158):
     azi, incl, depth = get_survey_means_pr_meter()
     fig,ax = plt.subplots(2,1)
     ax[0].scatter(depth,azi)
+    ax[0].set_title("Mean difference between azimuth angles for in-run and out-run")
+    ax[0].set_xlabel("Meters")
+    ax[0].set_ylabel("Degrees")
     ax[1].scatter(depth,incl)
+    ax[1].set_title("Mean difference between inclination angles for in-run and out-run")
+    ax[1].set_xlabel("Meters")
+    ax[1].set_ylabel("Degrees")
     plt.show()
 
 
